@@ -5,13 +5,12 @@ import ru.itmo.common.network.requests.AddRequest;
 import ru.itmo.common.network.requests.Request;
 import ru.itmo.common.network.responses.AddResponse;
 import ru.itmo.common.network.responses.Response;
+import ru.itmo.server.db.TicketRepository;
 import ru.itmo.server.managers.CollectionManager;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import static ru.itmo.server.db.TicketRepository.prepareAddStatement;
 
 /**
  * 'Add' command adds Ticket to collection if it is valid
@@ -33,7 +32,7 @@ public class Add extends Command {
         AddRequest addRequest = (AddRequest) request;
         Ticket ticket = new Ticket(addRequest.getTicket());
 
-        try (PreparedStatement statement = prepareAddStatement(ticket);
+        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket);
              ResultSet resultSet = statement.executeQuery()) {
 
             if (resultSet.next()) {
