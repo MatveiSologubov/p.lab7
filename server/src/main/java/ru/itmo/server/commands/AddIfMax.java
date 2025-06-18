@@ -41,7 +41,7 @@ public class AddIfMax extends Command {
             return new AddIfMaxResponse(false, message);
         }
 
-        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket);
+        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket, request.getUser().getLogin());
              ResultSet resultSet = statement.executeQuery()){
 
             if (resultSet.next()) {

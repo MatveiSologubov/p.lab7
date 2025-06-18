@@ -1,5 +1,6 @@
 package ru.itmo.client.network;
 
+import ru.itmo.client.managers.UserHandler;
 import ru.itmo.common.network.requests.Request;
 import ru.itmo.common.network.responses.Response;
 import ru.itmo.common.util.Config;
@@ -45,6 +46,7 @@ public class UPDClient {
      * @throws IOException if timeout reached or socket throws one
      */
     public Response sendAndReceive(Request request) throws IOException {
+        request.setUser(UserHandler.getCurrentUser());
         byte[] data = Serializer.serialize(request);
         sendDataInChunks(data);
 

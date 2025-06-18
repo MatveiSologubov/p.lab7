@@ -32,7 +32,7 @@ public class Add extends Command {
         AddRequest addRequest = (AddRequest) request;
         Ticket ticket = new Ticket(addRequest.getTicket());
 
-        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket);
+        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket, request.getUser().getLogin());
              ResultSet resultSet = statement.executeQuery()) {
 
             if (resultSet.next()) {

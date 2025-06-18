@@ -44,7 +44,7 @@ public class DatabaseInitializer {
                     person_height INTEGER NOT NULL,
                     person_weight REAL NOT NULL,
                     person_passport VARCHAR,
-                    owner_login VARCHAR REFERENCES users(login)
+                    owner_login VARCHAR REFERENCES users(login) NOT NULL
                     )
             """
     };

@@ -56,7 +56,7 @@ public class TicketRepository {
         return result;
     }
 
-    public static PreparedStatement prepareAddStatement(Ticket ticket) throws SQLException {
+    public static PreparedStatement prepareAddStatement(Ticket ticket, String owner_login) throws SQLException {
         PreparedStatement statement = getPreparedStatement();
 
         statement.setString(1, ticket.getName());
@@ -99,6 +99,8 @@ public class TicketRepository {
         statement.setFloat(11, person.getWeight());
         statement.setString(12, person.getPassportID());
 
+        statement.setString(13, owner_login);
+
         return statement;
     }
 
@@ -106,8 +108,9 @@ public class TicketRepository {
         String sql = """
                 INSERT INTO tickets(name, coord_x, coord_y, creation_date,
                                     price, comment, refundable, type, person_birthday,
-                                    person_height, person_weight, person_passport)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                    person_height, person_weight, person_passport,
+                                    owner_login)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id
                 """;
 

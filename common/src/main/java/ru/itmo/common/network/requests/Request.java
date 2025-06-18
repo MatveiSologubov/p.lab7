@@ -1,5 +1,7 @@
 package ru.itmo.common.network.requests;
 
+import ru.itmo.common.models.User;
+
 import java.io.Serializable;
 
 /**
@@ -7,6 +9,7 @@ import java.io.Serializable;
  */
 public class Request implements Serializable {
     private final String commandName;
+    private User user;
 
     public Request(String commandName) {
         this.commandName = commandName;
@@ -14,5 +17,13 @@ public class Request implements Serializable {
 
     public String name() {
         return commandName;
+    }
+
+   public void setUser(User user) {
+        this.user = user;
+   }
+
+    public User getUser() {
+        return user;
     }
 }
