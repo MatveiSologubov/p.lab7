@@ -19,32 +19,16 @@ public class Person implements Validatable, Serializable {
         this.passportID = passportID;
     }
 
-    public LocalDateTime getBirthday() {
-        return this.birthday;
-    }
-
     public void setBirthday(LocalDateTime birthday) {
         this.birthday = birthday;
-    }
-
-    public Integer getHeight() {
-        return this.height;
     }
 
     public void setHeight(Integer height) {
         this.height = height;
     }
 
-    public float getWeight() {
-        return this.weight;
-    }
-
     public void setWeight(float weight) {
         this.weight = weight;
-    }
-
-    public String getPassportID() {
-        return this.passportID;
     }
 
     public void setPassportID(String passportID) {

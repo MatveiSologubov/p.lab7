@@ -8,7 +8,12 @@ import ru.itmo.common.network.responses.Response;
 import ru.itmo.common.util.Config;
 import ru.itmo.common.util.Serializer;
 import ru.itmo.server.commands.*;
-import ru.itmo.server.managers.*;
+import ru.itmo.server.db.DatabaseInitializer;
+import ru.itmo.server.db.TicketRepository;
+import ru.itmo.server.managers.CollectionManager;
+import ru.itmo.server.managers.CommandRegistry;
+import ru.itmo.server.managers.ConsoleManager;
+import ru.itmo.server.managers.NetworkManager;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -20,33 +25,24 @@ import java.nio.ByteBuffer;
  */
 public final class Server {
     private final static Logger logger = LogManager.getLogger(Server.class);
-    private static String filePath;
     private final CommandRegistry commandRegistry;
     private final CollectionManager collectionManager = new CollectionManager();
     private final NetworkManager networkManager;
-    private final FileManager fileManager = new FileManager();
 
     private volatile boolean running = true;
 
     private Server() throws IOException {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("Shutdown hook triggered");
-            fileManager.save(collectionManager.getCollection(), filePath);
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> logger.info("Shutdown hook triggered")));
 
         logger.info("Initializing server");
 
-        filePath = System.getenv("COLLECTION_FILE");
-        if (filePath == null) {
-            System.out.println("File path cannot be null");
-            System.exit(0);
-        }
+        DatabaseInitializer.init();
 
-        collectionManager.setCollection(fileManager.load(filePath));
+        collectionManager.setCollection(TicketRepository.getAllTickets());
 
         networkManager = new NetworkManager(Config.defaultConfig());
 
-        ConsoleManager consoleManager = new ConsoleManager(this::stop, fileManager, collectionManager, filePath);
+        ConsoleManager consoleManager = new ConsoleManager(this::stop);
         new Thread(consoleManager).start();
 
         commandRegistry = new CommandRegistry() {{
@@ -120,7 +116,6 @@ public final class Server {
 
     private void shutdown() {
         logger.info("Starting server shutdown");
-        fileManager.save(collectionManager.getCollection(), filePath);
         networkManager.close();
         logger.info("Server shutdown completed");
     }

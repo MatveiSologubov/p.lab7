@@ -3,11 +3,8 @@ package ru.itmo.common.models;
 import java.io.Serializable;
 
 public class Coordinates implements Validatable, Serializable {
-    private Integer x; // Максимальное значение поля: 793, Поле не может быть null
-    private Float y; // Значение поля должно быть больше -429, Поле не может быть null
-
-    public Coordinates() {
-    }
+    private final Integer x; // Максимальное значение поля: 793, Поле не может быть null
+    private final Float y; // Значение поля должно быть больше -429, Поле не может быть null
 
 
     public Coordinates(Integer x, Float y) {
@@ -19,16 +16,8 @@ public class Coordinates implements Validatable, Serializable {
         return this.x;
     }
 
-    public void setX(Integer x) {
-        this.x = x;
-    }
-
     public Float getY() {
         return this.y;
-    }
-
-    public void setY(Float y) {
-        this.y = y;
     }
 
     @Override

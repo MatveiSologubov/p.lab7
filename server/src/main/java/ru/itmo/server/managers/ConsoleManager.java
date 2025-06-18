@@ -13,19 +13,11 @@ public class ConsoleManager implements Runnable {
     private static final Logger logger = LogManager.getLogger(ConsoleManager.class);
 
     private final Runnable serverShutdownHook;
-    private final FileManager fileManager;
-    private final CollectionManager collectionManager;
-    private final String filePath;
     private volatile boolean running;
     private volatile boolean commandMode = false;
 
-    public ConsoleManager(Runnable serverShutdownHook, FileManager fileManager,
-                          CollectionManager collectionManager,
-                          String filePath) {
+    public ConsoleManager(Runnable serverShutdownHook) {
         this.serverShutdownHook = serverShutdownHook;
-        this.fileManager = fileManager;
-        this.collectionManager = collectionManager;
-        this.filePath = filePath;
         this.running = true;
     }
 
@@ -56,7 +48,6 @@ public class ConsoleManager implements Runnable {
         commandMode = true;
         System.out.println("[Command Mode]");
         System.out.println("  watch - Enable live logging");
-        System.out.println("  save  - Save collection");
         System.out.println("  shut  - Shutdown server");
     }
 
@@ -67,10 +58,6 @@ public class ConsoleManager implements Runnable {
      */
     private void handle(String command) {
         switch (command) {
-            case "save" -> {
-                fileManager.save(collectionManager.getCollection(), filePath);
-                logger.info("Collection manually saved to {}", filePath);
-            }
             case "shut" -> {
                 logger.info("Shutting down server due to command");
                 running = false;
