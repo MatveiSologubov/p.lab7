@@ -46,6 +46,8 @@ public final class Server {
         new Thread(consoleManager).start();
 
         commandRegistry = new CommandRegistry() {{
+            registerCommand("register", new Register());
+
             registerCommand("info", new Info(collectionManager));
             registerCommand("show", new Show(collectionManager));
             registerCommand("clear", new Clear(collectionManager));
