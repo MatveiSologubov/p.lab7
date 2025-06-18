@@ -5,9 +5,13 @@ import ru.itmo.common.network.requests.AddIfMinRequest;
 import ru.itmo.common.network.requests.Request;
 import ru.itmo.common.network.responses.AddIfMinResponse;
 import ru.itmo.common.network.responses.Response;
+import ru.itmo.server.db.TicketRepository;
 import ru.itmo.server.managers.CollectionManager;
 
-import java.util.Collections;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * 'Add If Min' command adds Ticket to collection if its valid and has minimum price
@@ -29,17 +33,26 @@ public class AddIfMin extends Command {
         AddIfMinRequest addRequest = (AddIfMinRequest) request;
         Ticket ticket = new Ticket(addRequest.getTicket());
 
-        if (collectionManager.getCollection().isEmpty()) {
-            collectionManager.add(ticket);
-            return new AddIfMinResponse(true, null);
+        Optional<Ticket> currentMin = collectionManager.getCollection()
+                .stream().min(Ticket::compareTo);
+
+        if (currentMin.isPresent() && ticket.compareTo(currentMin.get()) >= 0) {
+            String message = "Ticket not added to collection. Current min price is " + currentMin.get().getPrice();
+            return new AddIfMinResponse(false, message);
         }
 
-        float minPrice = Collections.min(collectionManager.getCollection()).getPrice();
-        if (ticket.getPrice() < minPrice) {
-            collectionManager.add(ticket);
-            return new AddIfMinResponse(true, null);
+        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+                long generatedId = resultSet.getLong(1);
+                ticket.setId(generatedId);
+                collectionManager.add(ticket);
+            }
+        } catch (SQLException e) {
+            return new AddIfMinResponse(false, e.getMessage());
         }
 
-        return new AddIfMinResponse(false, "Ticket not added. Current min price is " + minPrice);
+        return new AddIfMinResponse(true, null);
     }
 }
