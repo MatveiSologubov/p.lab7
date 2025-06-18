@@ -19,11 +19,9 @@ import java.util.Set;
 public class ExecuteScript extends Command {
     private final static Set<String> runningScripts = new HashSet<>();
     private final CommandRegistry commandRegistry;
-    private final ScannerManager scannerManager;
 
-    public ExecuteScript(CommandRegistry commandRegistry, ScannerManager scannerManager) {
+    public ExecuteScript(CommandRegistry commandRegistry) {
         this.commandRegistry = commandRegistry;
-        this.scannerManager = scannerManager;
     }
 
 
@@ -44,8 +42,8 @@ public class ExecuteScript extends Command {
                 throw new ScriptRecursionException();
             }
             runningScripts.add(filePath);
-            scannerManager.setScriptScanner(scriptScanner);
-            scannerManager.setScriptMode(true);
+            ScannerManager.setScriptScanner(scriptScanner);
+            ScannerManager.setScriptMode(true);
 
             while (scriptScanner.hasNextLine()) {
                 String input = scriptScanner.nextLine().trim();
@@ -74,7 +72,7 @@ public class ExecuteScript extends Command {
             System.out.println(e.getMessage());
         } finally {
             runningScripts.remove(filePath);
-            scannerManager.setScriptMode(false);
+            ScannerManager.setScriptMode(false);
         }
     }
 

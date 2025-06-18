@@ -14,11 +14,8 @@ import java.io.IOException;
  * 'Add' command builds and adds Ticket to collection if its valid
  */
 public class Add extends NetworkCommand {
-    final ScannerManager scannerManager;
-
-    public Add(UPDClient client, ScannerManager scannerManager) {
+    public Add(UPDClient client) {
         super(client);
-        this.scannerManager = scannerManager;
     }
 
     /**
@@ -31,7 +28,7 @@ public class Add extends NetworkCommand {
     public void execute(String[] args) throws WrongAmountOfArgumentsException, IOException {
         if (args.length != 0) throw new WrongAmountOfArgumentsException(0, args.length);
 
-        TicketBuilder builder = new TicketBuilder(scannerManager.getScanner());
+        TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
         AddResponse response = (AddResponse) client.sendAndReceive(new AddRequest(ticket));

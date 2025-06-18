@@ -14,11 +14,8 @@ import java.io.IOException;
  * 'Update' command builds Ticket and the updates Ticket with specified id with data from new Ticket
  */
 public class Update extends NetworkCommand {
-    private final ScannerManager scannerManager;
-
-    public Update(UPDClient client, ScannerManager scannerManager) {
+    public Update(UPDClient client) {
         super(client);
-        this.scannerManager = scannerManager;
     }
 
 
@@ -40,7 +37,7 @@ public class Update extends NetworkCommand {
             return;
         }
 
-        TicketBuilder builder = new TicketBuilder(scannerManager.getScanner());
+        TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
         UpdateResponse response = (UpdateResponse) client.sendAndReceive(new UpdateRequest(id, ticket));

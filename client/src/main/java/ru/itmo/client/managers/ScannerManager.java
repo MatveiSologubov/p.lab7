@@ -6,17 +6,17 @@ import java.util.Scanner;
  * Manages different scanners that are used in program
  */
 public class ScannerManager {
-    private final Scanner mainScanner;
-    boolean scriptMode = false;
-    private Scanner fileScanner;
+    private static Scanner mainScanner;
+    private static boolean scriptMode = false;
+    private static Scanner fileScanner;
 
     /**
-     * Initialises scanner manager
+     * Set scanner for interactive mode
      *
-     * @param mainScanner scanner to use in interactive mode
+     * @param mainScanner scanner to set
      */
-    public ScannerManager(Scanner mainScanner) {
-        this.mainScanner = mainScanner;
+    public static void setMainScanner(Scanner mainScanner) {
+        ScannerManager.mainScanner = mainScanner;
     }
 
     /**
@@ -24,8 +24,8 @@ public class ScannerManager {
      *
      * @param fileScanner scanner to set
      */
-    public void setScriptScanner(Scanner fileScanner) {
-        this.fileScanner = fileScanner;
+    public static void setScriptScanner(Scanner fileScanner) {
+        ScannerManager.fileScanner = fileScanner;
     }
 
     /**
@@ -33,8 +33,8 @@ public class ScannerManager {
      *
      * @param scriptMode true for script mode; false for interactive mode
      */
-    public void setScriptMode(boolean scriptMode) {
-        this.scriptMode = scriptMode;
+    public static void setScriptMode(boolean scriptMode) {
+        ScannerManager.scriptMode = scriptMode;
     }
 
     /**
@@ -42,7 +42,7 @@ public class ScannerManager {
      *
      * @return active scanner
      */
-    public Scanner getScanner() {
+    public static Scanner getScanner() {
         if (scriptMode) {
             return fileScanner;
         }

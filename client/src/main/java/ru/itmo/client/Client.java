@@ -16,7 +16,6 @@ import java.util.Scanner;
 public final class Client {
     final CommandRegistry commandRegistry;
     final Scanner scanner = new Scanner(System.in);
-    final ScannerManager scannerManager = new ScannerManager(scanner);
     boolean running = true;
     private UPDClient updClient;
 
@@ -28,19 +27,21 @@ public final class Client {
             System.exit(1);
         }
 
+        ScannerManager.setMainScanner(scanner);
+
         commandRegistry = new CommandRegistry() {{
             registerCommand("help", new Help(this));
             registerCommand("info", new Info(updClient));
             registerCommand("show", new Show(updClient));
-            registerCommand("add", new Add(updClient, scannerManager));
-            registerCommand("update", new Update(updClient, scannerManager));
+            registerCommand("add", new Add(updClient));
+            registerCommand("update", new Update(updClient));
             registerCommand("remove_by_id", new RemoveById(updClient));
             registerCommand("clear", new Clear(updClient));
-            registerCommand("execute_script", new ExecuteScript(this, scannerManager));
+            registerCommand("execute_script", new ExecuteScript(this));
             registerCommand("exit", new Exit(Client.this::stop));
-            registerCommand("add_if_max", new AddIfMax(updClient, scannerManager));
-            registerCommand("add_if_min", new AddIfMin(updClient, scannerManager));
-            registerCommand("remove_greater", new RemoveGreater(updClient, scannerManager));
+            registerCommand("add_if_max", new AddIfMax(updClient));
+            registerCommand("add_if_min", new AddIfMin(updClient));
+            registerCommand("remove_greater", new RemoveGreater(updClient));
             registerCommand("min_by_creation_date", new MinByCreationDate(updClient));
             registerCommand("filter_less_than_type", new FilterLessThanType(updClient));
             registerCommand("filter_greater_than_price", new FilterGreaterThanPrice(updClient));

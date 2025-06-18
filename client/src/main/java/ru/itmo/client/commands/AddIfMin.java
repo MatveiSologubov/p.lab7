@@ -14,11 +14,8 @@ import java.io.IOException;
  * 'Add If Min' command builds and adds Ticket to collection if its valid and has minimum price
  */
 public class AddIfMin extends NetworkCommand {
-    private final ScannerManager scannerManager;
-
-    public AddIfMin(UPDClient updClient, ScannerManager scannerManager) {
+    public AddIfMin(UPDClient updClient) {
         super(updClient);
-        this.scannerManager = scannerManager;
     }
 
     /**
@@ -31,7 +28,7 @@ public class AddIfMin extends NetworkCommand {
     public void execute(String[] args) throws WrongAmountOfArgumentsException, IOException {
         if (args.length != 0) throw new WrongAmountOfArgumentsException(0, args.length);
 
-        TicketBuilder builder = new TicketBuilder(scannerManager.getScanner());
+        TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
         AddIfMinResponse response = (AddIfMinResponse) client.sendAndReceive(new AddIfMinRequest(ticket));

@@ -14,11 +14,8 @@ import java.io.IOException;
  * 'Remove Greater' command builds Ticket and then removes all Tickets with bigger price than built Ticket
  */
 public class RemoveGreater extends NetworkCommand {
-    private final ScannerManager scannerManager;
-
-    public RemoveGreater(UPDClient client, ScannerManager scannerManager) {
+    public RemoveGreater(UPDClient client) {
         super(client);
-        this.scannerManager = scannerManager;
     }
 
     /**
@@ -31,7 +28,7 @@ public class RemoveGreater extends NetworkCommand {
     public void execute(String[] args) throws WrongAmountOfArgumentsException, IOException {
         if (args.length != 0) throw new WrongAmountOfArgumentsException(0, args.length);
 
-        TicketBuilder builder = new TicketBuilder(scannerManager.getScanner());
+        TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
         RemoveGreaterRequest request = new RemoveGreaterRequest(ticket);
