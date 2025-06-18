@@ -22,6 +22,14 @@ public class DatabaseInitializer {
             "CREATE SEQUENCE IF NOT EXISTS ticket_id_seq START 1",
 
             """
+            CREATE TABLE IF NOT EXISTS users (
+                    login VARCHAR(32) PRIMARY KEY,
+                    password_hash CHAR(32) NOT NULL,
+                    salt CHAR(16) NOT NULL
+                    )
+            """,
+
+            """
             CREATE TABLE IF NOT EXISTS tickets (
                     id BIGINT PRIMARY KEY DEFAULT nextval('ticket_id_seq'),
                     name VARCHAR NOT NULL,
@@ -35,14 +43,8 @@ public class DatabaseInitializer {
                     person_birthday TIMESTAMP,
                     person_height INTEGER NOT NULL,
                     person_weight REAL NOT NULL,
-                    person_passport VARCHAR
-                    )
-            """,
-
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                    login VARCHAR PRIMARY KEY,
-                    password_hash CHAR(32) NOT NULL
+                    person_passport VARCHAR,
+                    owner_login VARCHAR REFERENCES users(login)
                     )
             """
     };
