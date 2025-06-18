@@ -2,6 +2,9 @@ package ru.itmo.server.managers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.itmo.common.util.RandomStringGenerator;
+import ru.itmo.server.db.DatabaseInitializer;
+import ru.itmo.server.db.TicketRepository;
 
 import java.util.Scanner;
 
@@ -13,11 +16,14 @@ public class ConsoleManager implements Runnable {
     private static final Logger logger = LogManager.getLogger(ConsoleManager.class);
 
     private final Runnable serverShutdownHook;
+    private final Scanner scanner = new Scanner(System.in);
+    private final CollectionManager collectionManager;
     private volatile boolean running;
     private volatile boolean commandMode = false;
 
-    public ConsoleManager(Runnable serverShutdownHook) {
+    public ConsoleManager(Runnable serverShutdownHook, CollectionManager collectionManager) {
         this.serverShutdownHook = serverShutdownHook;
+        this.collectionManager = collectionManager;
         this.running = true;
     }
 
@@ -26,16 +32,14 @@ public class ConsoleManager implements Runnable {
      */
     @Override
     public void run() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Press Enter to enter command mode...");
-            while (running) {
-                scanner.nextLine();
-                enterCommandMode();
-                while (commandMode && running) {
-                    System.out.print("server> ");
-                    String cmd = scanner.nextLine().trim();
-                    handle(cmd);
-                }
+        System.out.println("Press Enter to enter command mode...");
+        while (running) {
+            scanner.nextLine();
+            enterCommandMode();
+            while (commandMode && running) {
+                System.out.print("server> ");
+                String cmd = scanner.nextLine().trim();
+                handle(cmd);
             }
         }
     }
@@ -47,8 +51,9 @@ public class ConsoleManager implements Runnable {
         LogModeManager.disableConsoleLogging();
         commandMode = true;
         System.out.println("[Command Mode]");
-        System.out.println("  watch - Enable live logging");
-        System.out.println("  shut  - Shutdown server");
+        System.out.println("  watch   - Enable live logging");
+        System.out.println("  shut    - Shutdown server");
+        System.out.println("  reinit  - Reinitialize database");
     }
 
     /**
@@ -67,6 +72,20 @@ public class ConsoleManager implements Runnable {
                 LogModeManager.enableConsoleLogging();
                 System.out.println("Live logging enabled");
                 commandMode = false;
+            }
+            case "reinit" -> {
+                System.out.println("Wow. Are you sure you want to reinitialize database?");
+                System.out.println("It will delete all user data. We are not gitlab!");
+                String verificationString = RandomStringGenerator.generate(5);
+                System.out.println("To verify type this string: " + verificationString);
+                String input = scanner.nextLine().trim();
+                if (input.equals(verificationString)) {
+                    System.out.println("Dropping DB...");
+                    DatabaseInitializer.reinitialize();
+                    collectionManager.setCollection(TicketRepository.getAllTickets());
+                    return;
+                }
+                System.out.println("Verification failed. Good luck next time");
             }
             default -> System.out.println("Unknown command");
         }

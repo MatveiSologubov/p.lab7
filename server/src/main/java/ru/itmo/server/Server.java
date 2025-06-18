@@ -42,7 +42,7 @@ public final class Server {
 
         networkManager = new NetworkManager(Config.defaultConfig());
 
-        ConsoleManager consoleManager = new ConsoleManager(this::stop);
+        ConsoleManager consoleManager = new ConsoleManager(this::stop, collectionManager);
         new Thread(consoleManager).start();
 
         commandRegistry = new CommandRegistry() {{
