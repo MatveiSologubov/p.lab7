@@ -55,4 +55,63 @@ public class TicketRepository {
 
         return result;
     }
+
+    public static PreparedStatement prepareAddStatement(Ticket ticket) throws SQLException {
+        PreparedStatement statement = getPreparedStatement();
+
+        statement.setString(1, ticket.getName());
+        statement.setInt(2, ticket.getCoordinates().getX());
+        statement.setFloat(3, ticket.getCoordinates().getY());
+        statement.setTimestamp(4, Timestamp.from(ticket.getCreationDate().toInstant()));
+
+        if (ticket.getPrice() != null) {
+            statement.setFloat(5, ticket.getPrice());
+        } else {
+            statement.setNull(5, Types.REAL);
+        }
+
+        statement.setString(6, ticket.getComment());
+        statement.setBoolean(7, ticket.getRefundable());
+
+        if (ticket.getType() != null) {
+            statement.setString(8, ticket.getType().name());
+        } else {
+            statement.setNull(8, Types.VARCHAR);
+        }
+
+        Person person = ticket.getPerson();
+
+        if (person == null) {
+            statement.setNull(9, Types.TIMESTAMP);
+            statement.setNull(10, Types.INTEGER);
+            statement.setNull(11, Types.REAL);
+            statement.setNull(12, Types.VARCHAR);
+            return statement;
+        }
+
+        if (person.getBirthday() != null) {
+            statement.setTimestamp(9, Timestamp.valueOf(person.getBirthday()));
+        } else {
+            statement.setNull(9, Types.TIMESTAMP);
+        }
+
+        statement.setInt(10, person.getHeight());
+        statement.setFloat(11, person.getWeight());
+        statement.setString(12, person.getPassportID());
+
+        return statement;
+    }
+
+    private static PreparedStatement getPreparedStatement() throws SQLException {
+        String sql = """
+                INSERT INTO tickets(name, coord_x, coord_y, creation_date,
+                                    price, comment, refundable, type, person_birthday,
+                                    person_height, person_weight, person_passport)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """;
+
+        Connection connection = Database.getConnection();
+        return connection.prepareStatement(sql);
+    }
 }
