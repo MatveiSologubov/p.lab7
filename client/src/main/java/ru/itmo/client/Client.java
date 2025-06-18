@@ -30,6 +30,7 @@ public final class Client {
         ScannerManager.setMainScanner(scanner);
 
         commandRegistry = new CommandRegistry() {{
+            registerCommand("auth", new Auth(updClient));
             registerCommand("register", new Register(updClient));
 
             registerCommand("help", new Help(this));
