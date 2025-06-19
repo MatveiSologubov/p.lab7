@@ -65,6 +65,7 @@ public class ConsoleManager implements Runnable {
         switch (command) {
             case "shut" -> {
                 logger.info("Shutting down server due to command");
+                LogModeManager.enableConsoleLogging();
                 running = false;
                 serverShutdownHook.run();
             }
@@ -81,7 +82,9 @@ public class ConsoleManager implements Runnable {
                 String input = scanner.nextLine().trim();
                 if (input.equals(verificationString)) {
                     System.out.println("Dropping DB...");
+                    LogModeManager.enableConsoleLogging();
                     DatabaseInitializer.reinitialize();
+                    LogModeManager.disableConsoleLogging();
                     collectionManager.setCollection(TicketRepository.getAllTickets());
                     return;
                 }
