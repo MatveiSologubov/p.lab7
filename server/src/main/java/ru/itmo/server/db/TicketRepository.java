@@ -105,6 +105,24 @@ public class TicketRepository {
         return statement;
     }
 
+    /**
+     * Delete all tickets owned by specified user
+     * @param login user that issued deletion
+     * @return number of tickets deleted
+     */
+    public static int deleteAllByUser(String login) {
+        String sql = "DELETE FROM tickets WHERE owner_login = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, login);
+            return ps.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error clearing user tickets", e);
+        }
+    }
+
     private static PreparedStatement getPreparedStatement() throws SQLException {
         String sql = """
                 INSERT INTO tickets(name, coord_x, coord_y, creation_date,

@@ -38,12 +38,6 @@ public class CollectionManager {
         collection.add(ticket);
     }
 
-    /**
-     * Clears collection
-     */
-    public void clearCollection() {
-        collection.clear();
-    }
 
     public int getCollectionSize() {
         return collection.size();
