@@ -155,4 +155,33 @@ public class TicketRepository {
         }
     }
 
+    /**
+     * Update Ticket with specified id if it's owned by specified user
+     *
+     * @param id     Ticket to update
+     * @param ticket Ticket to update to
+     * @param login  Owner login
+     * @return true if operation is successful. False otherwise
+     */
+    public static boolean update(long id, Ticket ticket, String login) {
+        String sql = """
+                UPDATE tickets SET
+                  name = ?, coord_x = ?, coord_y = ?, creation_date = ?,
+                  price = ?, comment = ?, refundable = ?, type = ?,
+                  person_birthday = ?, person_height = ?, person_weight = ?, person_passport = ?
+                WHERE id = ? AND owner_login = ?
+                """;
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            bindTicket(ps, ticket);
+
+            ps.setLong(13, id);
+            ps.setString(14, login);
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating ticket", e);
+        }
+    }
 }
