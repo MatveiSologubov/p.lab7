@@ -114,6 +114,11 @@ public final class Server {
         }
     }
 
+    /**
+     * Deserializes received data and sends it to processing
+     *
+     * @param rec received data
+     */
     private void handleRequestAsync(NetworkManager.Received rec) {
         ByteBuffer buffer = rec.buffer;
         SocketAddress clientAddress = rec.clientAddress;
@@ -139,6 +144,12 @@ public final class Server {
         }
     }
 
+    /**
+     * Processes request. Checks authorization and execute given request
+     *
+     * @param request request to process
+     * @return response to send to client
+     */
     private Response processRequest(Request request) {
         logger.info("Processing command '{}'", request.name());
 
@@ -160,6 +171,12 @@ public final class Server {
         }
     }
 
+    /**
+     * Check if request can be issued by user
+     *
+     * @param request request to check
+     * @return true if authorization successful or not needed. False otherwise
+     */
     private boolean checkAuthorization(Request request) {
         if (request instanceof AuthRequest || request instanceof RegisterRequest) return true;
         User user = request.getUser();
@@ -172,6 +189,9 @@ public final class Server {
         }
     }
 
+    /**
+     * Shuts down server
+     */
     private void shutdown() {
         logger.info("Starting server shutdown");
         if (requestReadingPool != null) requestReadingPool.shutdown();
