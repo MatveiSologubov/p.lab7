@@ -41,7 +41,7 @@ public class AddIfMin extends Command {
             return new AddIfMinResponse(false, message);
         }
 
-        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket, request.getUser().getLogin());
+        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket);
              ResultSet resultSet = statement.executeQuery()) {
 
             if (resultSet.next()) {

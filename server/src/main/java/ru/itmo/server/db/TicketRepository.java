@@ -57,9 +57,22 @@ public class TicketRepository {
         return result;
     }
 
-    public static PreparedStatement prepareAddStatement(Ticket ticket, String owner_login) throws SQLException {
-        PreparedStatement statement = getPreparedStatement();
+    public static PreparedStatement prepareAddStatement(Ticket ticket) throws SQLException {
+        String sql = """
+                INSERT INTO tickets(name, coord_x, coord_y, creation_date,
+                                    price, comment, refundable, type, person_birthday,
+                                    person_height, person_weight, person_passport,
+                                    owner_login)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                RETURNING id
+                """;
 
+        PreparedStatement statement = Database.getConnection().prepareStatement(sql);
+        bindTicket(statement, ticket);
+        return statement;
+    }
+
+    public static void bindTicket(PreparedStatement statement, Ticket ticket) throws SQLException {
         statement.setString(1, ticket.getName());
         statement.setInt(2, ticket.getCoordinates().getX());
         statement.setFloat(3, ticket.getCoordinates().getY());
@@ -87,7 +100,7 @@ public class TicketRepository {
             statement.setNull(10, Types.INTEGER);
             statement.setNull(11, Types.REAL);
             statement.setNull(12, Types.VARCHAR);
-            return statement;
+            return;
         }
 
         if (person.getBirthday() != null) {
@@ -100,13 +113,12 @@ public class TicketRepository {
         statement.setFloat(11, person.getWeight());
         statement.setString(12, person.getPassportID());
 
-        statement.setString(13, owner_login);
-
-        return statement;
+        statement.setString(13, ticket.getOwner());
     }
 
     /**
      * Delete all tickets owned by specified user
+     *
      * @param login user that issued deletion
      * @return number of tickets deleted
      */
@@ -143,17 +155,4 @@ public class TicketRepository {
         }
     }
 
-    private static PreparedStatement getPreparedStatement() throws SQLException {
-        String sql = """
-                INSERT INTO tickets(name, coord_x, coord_y, creation_date,
-                                    price, comment, refundable, type, person_birthday,
-                                    person_height, person_weight, person_passport,
-                                    owner_login)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                RETURNING id
-                """;
-
-        Connection connection = Database.getConnection();
-        return connection.prepareStatement(sql);
-    }
 }

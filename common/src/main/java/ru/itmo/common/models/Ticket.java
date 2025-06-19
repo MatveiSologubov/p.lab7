@@ -36,7 +36,7 @@ public class Ticket implements Comparable<Ticket>, Validatable, Serializable {
     }
 
     public Ticket(String name, Coordinates coordinates, ZonedDateTime creationDate, Float price,
-                  String comment, Boolean refundable, TicketType type, Person person) {
+                  String comment, Boolean refundable, TicketType type, Person person, String ownerLogin) {
         this.id = idCounter++;
         this.name = name;
         this.coordinates = coordinates;
@@ -46,6 +46,7 @@ public class Ticket implements Comparable<Ticket>, Validatable, Serializable {
         this.refundable = refundable;
         this.type = type;
         this.person = person;
+        this.ownerLogin = ownerLogin;
     }
 
 
@@ -135,11 +136,11 @@ public class Ticket implements Comparable<Ticket>, Validatable, Serializable {
         this.person = person;
     }
 
-    public String getOwner(){
+    public String getOwner() {
         return ownerLogin;
     }
 
-    public void setOwner(String ownerLogin){
+    public void setOwner(String ownerLogin) {
         this.ownerLogin = ownerLogin;
     }
 

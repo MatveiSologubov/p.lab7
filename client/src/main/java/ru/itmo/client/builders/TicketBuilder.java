@@ -1,5 +1,6 @@
 package ru.itmo.client.builders;
 
+import ru.itmo.client.managers.UserHandler;
 import ru.itmo.common.exceptions.FieldMustNotBeEmpty;
 import ru.itmo.common.models.Coordinates;
 import ru.itmo.common.models.Person;
@@ -34,7 +35,8 @@ public class TicketBuilder implements Builder<Ticket> {
         Boolean refundable = readRefundable();
         TicketType ticketType = readTicketType();
         Person person = new PersonBuilder(scanner).build();
-        return new Ticket(name, coordinates, ZonedDateTime.now(), price, comment, refundable, ticketType, person);
+        String login = UserHandler.getCurrentUser().getLogin();
+        return new Ticket(name, coordinates, ZonedDateTime.now(), price, comment, refundable, ticketType, person, login);
     }
 
     private TicketType readTicketType() {
