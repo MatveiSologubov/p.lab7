@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * Server application entry point.
@@ -34,6 +37,10 @@ public final class Server {
     private final CommandRegistry commandRegistry;
     private final CollectionManager collectionManager = new CollectionManager();
     private final NetworkManager networkManager;
+
+    private ForkJoinPool requestReadingPool;
+    private ForkJoinPool requestProcessingPool;
+    private ExecutorService responseSendingPool;
 
     private volatile boolean running = true;
 
@@ -85,6 +92,11 @@ public final class Server {
 
     public void start() {
         logger.info("Starting server main loop");
+
+        requestReadingPool = new ForkJoinPool();
+        requestProcessingPool = new ForkJoinPool();
+        responseSendingPool = Executors.newFixedThreadPool(4);
+
         try {
             while (running) {
                 NetworkManager.Received rec = networkManager.receive(100);
@@ -93,7 +105,7 @@ public final class Server {
                     continue;
                 }
 
-                handleRequest(rec.buffer, rec.clientAddress);
+                requestReadingPool.execute(() -> handleRequestAsync(rec));
             }
         } catch (Exception e) {
             logger.error("Critical server error", e);
@@ -102,29 +114,49 @@ public final class Server {
         }
     }
 
-    private void handleRequest(ByteBuffer buffer, SocketAddress clientAddress) {
+    private void handleRequestAsync(NetworkManager.Received rec) {
+        ByteBuffer buffer = rec.buffer;
+        SocketAddress clientAddress = rec.clientAddress;
+
         try {
             byte[] data = new byte[buffer.limit()];
             buffer.get(data);
 
             Request request = (Request) Serializer.deserialize(data);
-            logger.info("Processing command '{}' from {}", request.name(), clientAddress);
 
-            if (!checkAuthorization(request)) {
-                logger.info("Client ({}) don't have authorization. Sending error response", clientAddress);
-                networkManager.sendResponse(new ErrorResponse("Authentication required to issue this command"), clientAddress);
-                return;
-            }
+            requestProcessingPool.execute(() -> {
+                Response response = processRequest(request);
 
-            Command command = commandRegistry.getCommand(request.name());
-            Response response = new NullResponse();
-            if (command != null) {
-                response = command.execute(request);
-            }
-
-            networkManager.sendResponse(response, clientAddress);
+                responseSendingPool.execute(() -> networkManager.sendResponse(response, clientAddress));
+            });
         } catch (Exception e) {
             logger.error("Request processing error", e);
+
+            responseSendingPool.execute(() -> networkManager.sendResponse(
+                    new ErrorResponse("Internal server error"),
+                    rec.clientAddress
+            ));
+        }
+    }
+
+    private Response processRequest(Request request) {
+        logger.info("Processing command '{}'", request.name());
+
+        if (!checkAuthorization(request)) {
+            logger.info("Client don't have authorization.");
+            return new ErrorResponse("Authentication required to issue this command");
+        }
+
+        Command command = commandRegistry.getCommand(request.name());
+        if (command == null) {
+            return new NullResponse();
+        }
+
+        try {
+            return command.execute(request);
+        } catch (Exception e) {
+            logger.error("Error executing command", e);
+            return new ErrorResponse("Command execution error");
         }
     }
 
@@ -142,7 +174,10 @@ public final class Server {
 
     private void shutdown() {
         logger.info("Starting server shutdown");
-        networkManager.close();
+        if (requestReadingPool != null) requestReadingPool.shutdown();
+        if (requestProcessingPool != null) requestProcessingPool.shutdown();
+        if (responseSendingPool != null) responseSendingPool.shutdown();
+        if (networkManager != null) networkManager.close();
         logger.info("Server shutdown completed");
     }
 }
