@@ -57,21 +57,6 @@ public class TicketRepository {
         return result;
     }
 
-    public static PreparedStatement prepareAddStatement(Ticket ticket) throws SQLException {
-        String sql = """
-                INSERT INTO tickets(name, coord_x, coord_y, creation_date,
-                                    price, comment, refundable, type, person_birthday,
-                                    person_height, person_weight, person_passport,
-                                    owner_login)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                RETURNING id
-                """;
-
-        PreparedStatement statement = Database.getConnection().prepareStatement(sql);
-        bindTicket(statement, ticket);
-        return statement;
-    }
-
     public static void bindTicket(PreparedStatement statement, Ticket ticket) throws SQLException {
         statement.setString(1, ticket.getName());
         statement.setInt(2, ticket.getCoordinates().getX());
@@ -114,6 +99,38 @@ public class TicketRepository {
         statement.setString(12, person.getPassportID());
 
         statement.setString(13, ticket.getOwner());
+    }
+
+    /**
+     * Insert Ticket into database
+     *
+     * @param ticket ticket to insert
+     * @return generated id of inserted Ticket or null if operation is unsuccessful
+     */
+    public static Long insert(Ticket ticket) {
+        String sql = """
+                INSERT INTO tickets
+                  (name, coord_x, coord_y, creation_date,
+                   price, comment, refundable, type,
+                   person_birthday, person_height, person_weight, person_passport,
+                   owner_login)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+                RETURNING id
+                """;
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            bindTicket(ps, ticket);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error inserting ticket", e);
+        }
+        return null;
     }
 
     /**

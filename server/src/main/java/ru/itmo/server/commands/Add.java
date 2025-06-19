@@ -8,10 +8,6 @@ import ru.itmo.common.network.responses.Response;
 import ru.itmo.server.db.TicketRepository;
 import ru.itmo.server.managers.CollectionManager;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 /**
  * 'Add' command adds Ticket to collection if it is valid
  */
@@ -32,18 +28,11 @@ public class Add extends Command {
         AddRequest addRequest = (AddRequest) request;
         Ticket ticket = new Ticket(addRequest.getTicket());
 
-        try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket);
-             ResultSet resultSet = statement.executeQuery()) {
+        Long generatedId = TicketRepository.insert(ticket);
+        if (generatedId == null) return new AddResponse(false);
 
-            if (resultSet.next()) {
-                long generatedId = resultSet.getLong(1);
-                ticket.setId(generatedId);
-                collectionManager.add(ticket);
-            }
-        } catch (SQLException e) {
-            return new AddResponse(false);
-        }
-
+        ticket.setId(generatedId);
+        collectionManager.add(ticket);
         return new AddResponse(true);
     }
 }
