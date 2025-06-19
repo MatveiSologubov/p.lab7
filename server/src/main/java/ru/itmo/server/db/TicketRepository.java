@@ -46,6 +46,7 @@ public class TicketRepository {
                 person.setWeight(resultSet.getFloat("person_weight"));
                 person.setPassportID(resultSet.getString("person_passport"));
                 ticket.setPerson(person);
+                ticket.setOwner(resultSet.getString("owner_login"));
 
                 result.add(ticket);
             }
