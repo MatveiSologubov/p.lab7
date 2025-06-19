@@ -61,6 +61,13 @@ public class TicketRepository {
         return result;
     }
 
+    /**
+     * Sets all parameters for insert query
+     *
+     * @param statement statement to fill
+     * @param ticket    Ticket to fill statement with
+     * @throws SQLException if encounters one
+     */
     public static void bindTicket(PreparedStatement statement, Ticket ticket) throws SQLException {
         statement.setString(1, ticket.getName());
         statement.setInt(2, ticket.getCoordinates().getX());
