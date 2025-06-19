@@ -4,6 +4,7 @@ import ru.itmo.client.network.UPDClient;
 import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.network.requests.RemoveByIdRequest;
 import ru.itmo.common.network.responses.RemoveByIdResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,7 +32,9 @@ public class RemoveById extends NetworkCommand {
             return;
         }
 
-        RemoveByIdResponse response = (RemoveByIdResponse) client.sendAndReceive(new RemoveByIdRequest(id));
+        Response receivedResponse = client.sendAndReceive(new RemoveByIdRequest(id));
+        RemoveByIdResponse response = handleResponse(receivedResponse, RemoveByIdResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Ticket with id " + id + " removed");

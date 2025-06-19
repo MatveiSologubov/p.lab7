@@ -7,6 +7,7 @@ import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.AddIfMaxRequest;
 import ru.itmo.common.network.responses.AddIfMaxResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,7 +32,9 @@ public class AddIfMax extends NetworkCommand {
         TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
-        AddIfMaxResponse response = (AddIfMaxResponse) client.sendAndReceive(new AddIfMaxRequest(ticket));
+        Response receivedResponse = client.sendAndReceive(new AddIfMaxRequest(ticket));
+        AddIfMaxResponse response = handleResponse(receivedResponse, AddIfMaxResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Ticket is added to collection");

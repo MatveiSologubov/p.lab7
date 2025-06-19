@@ -8,6 +8,7 @@ import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.User;
 import ru.itmo.common.network.requests.RegisterRequest;
 import ru.itmo.common.network.responses.RegisterResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,7 +32,9 @@ public class Register extends NetworkCommand {
 
         User user = new UserBuilder(ScannerManager.getScanner()).build();
 
-        RegisterResponse response = (RegisterResponse) client.sendAndReceive(new RegisterRequest(user));
+        Response receivedResponse = client.sendAndReceive(new RegisterRequest(user));
+        RegisterResponse response = handleResponse(receivedResponse, RegisterResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Registration successful!");

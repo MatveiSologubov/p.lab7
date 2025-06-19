@@ -4,6 +4,7 @@ import ru.itmo.client.network.UPDClient;
 import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.network.requests.MinByCreationDateRequest;
 import ru.itmo.common.network.responses.MinByCreationDateResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -26,7 +27,9 @@ public class MinByCreationDate extends NetworkCommand {
         if (args.length != 0) throw new WrongAmountOfArgumentsException(0, args.length);
 
         MinByCreationDateRequest request = new MinByCreationDateRequest();
-        MinByCreationDateResponse response = (MinByCreationDateResponse) client.sendAndReceive(request);
+        Response receivedResponse = client.sendAndReceive(request);
+        MinByCreationDateResponse response = handleResponse(receivedResponse, MinByCreationDateResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println(response.getTicket());

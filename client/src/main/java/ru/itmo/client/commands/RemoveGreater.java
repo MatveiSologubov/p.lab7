@@ -7,6 +7,7 @@ import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.RemoveGreaterRequest;
 import ru.itmo.common.network.responses.RemoveGreaterResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,9 +32,9 @@ public class RemoveGreater extends NetworkCommand {
         TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
-        RemoveGreaterRequest request = new RemoveGreaterRequest(ticket);
-        RemoveGreaterResponse response;
-        response = (RemoveGreaterResponse) client.sendAndReceive(request);
+        Response receivedResponse = client.sendAndReceive(new RemoveGreaterRequest(ticket));
+        RemoveGreaterResponse response = handleResponse(receivedResponse, RemoveGreaterResponse.class);
+        if (response == null) return;
 
         if (!response.isSuccess()) {
             System.out.println("Something went wrong");

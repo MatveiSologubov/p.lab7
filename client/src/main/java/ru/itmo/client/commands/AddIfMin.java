@@ -7,6 +7,7 @@ import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.AddIfMinRequest;
 import ru.itmo.common.network.responses.AddIfMinResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,7 +32,9 @@ public class AddIfMin extends NetworkCommand {
         TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
-        AddIfMinResponse response = (AddIfMinResponse) client.sendAndReceive(new AddIfMinRequest(ticket));
+        Response receivedResponse = client.sendAndReceive(new AddIfMinRequest(ticket));
+        AddIfMinResponse response = handleResponse(receivedResponse, AddIfMinResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Ticket is added to collection");

@@ -4,6 +4,7 @@ import ru.itmo.client.network.UPDClient;
 import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.network.requests.InfoRequest;
 import ru.itmo.common.network.responses.InfoResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -25,7 +26,9 @@ public class Info extends NetworkCommand {
     public void execute(String[] args) throws WrongAmountOfArgumentsException, IOException {
         if (args.length != 0) throw new WrongAmountOfArgumentsException(0, args.length);
 
-        InfoResponse response = (InfoResponse) client.sendAndReceive(new InfoRequest());
+        Response receivedResponse = client.sendAndReceive(new InfoRequest());
+        InfoResponse response = handleResponse(receivedResponse, InfoResponse.class);
+        if (response == null) return;
 
         System.out.println("Collection Info:");
         System.out.println(" Type: " + response.getCollectionType());

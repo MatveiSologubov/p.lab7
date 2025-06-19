@@ -7,6 +7,7 @@ import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.AddRequest;
 import ru.itmo.common.network.responses.AddResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,7 +32,9 @@ public class Add extends NetworkCommand {
         TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
-        AddResponse response = (AddResponse) client.sendAndReceive(new AddRequest(ticket));
+        Response receivedResponse = client.sendAndReceive(new AddRequest(ticket));
+        AddResponse response = handleResponse(receivedResponse, AddResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Ticket added successfully");

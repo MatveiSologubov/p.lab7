@@ -6,6 +6,7 @@ import ru.itmo.common.models.Ticket;
 import ru.itmo.common.models.TicketType;
 import ru.itmo.common.network.requests.FilterLessThanTypeRequest;
 import ru.itmo.common.network.responses.FilterLessThanTypeResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -40,7 +41,9 @@ public class FilterLessThanType extends NetworkCommand {
 
 
         FilterLessThanTypeRequest request = new FilterLessThanTypeRequest(type);
-        FilterLessThanTypeResponse response = (FilterLessThanTypeResponse) client.sendAndReceive(request);
+        Response receivedResponse = client.sendAndReceive(request);
+        FilterLessThanTypeResponse response = handleResponse(receivedResponse, FilterLessThanTypeResponse.class);
+        if (response == null) return;
 
         if (!response.isSuccess()) {
             System.out.println(response.getMessage());

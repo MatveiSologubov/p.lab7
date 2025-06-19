@@ -6,6 +6,7 @@ import ru.itmo.client.network.UPDClient;
 import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.UpdateRequest;
+import ru.itmo.common.network.responses.Response;
 import ru.itmo.common.network.responses.UpdateResponse;
 
 import java.io.IOException;
@@ -40,7 +41,9 @@ public class Update extends NetworkCommand {
         TicketBuilder builder = new TicketBuilder(ScannerManager.getScanner());
         Ticket ticket = builder.build();
 
-        UpdateResponse response = (UpdateResponse) client.sendAndReceive(new UpdateRequest(id, ticket));
+        Response receivedResponse = client.sendAndReceive(new UpdateRequest(id, ticket));
+        UpdateResponse response = handleResponse(receivedResponse, UpdateResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Ticket with id " + id + " has been updated");

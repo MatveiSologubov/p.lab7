@@ -4,6 +4,7 @@ import ru.itmo.client.network.UPDClient;
 import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.ShowRequest;
+import ru.itmo.common.network.responses.Response;
 import ru.itmo.common.network.responses.ShowResponse;
 
 import java.io.IOException;
@@ -12,11 +13,9 @@ import java.util.Comparator;
 /**
  * 'Show' command prints information of all the ticket in collection
  */
-public class Show extends Command {
-    final UPDClient client;
-
+public class Show extends NetworkCommand {
     public Show(UPDClient client) {
-        this.client = client;
+        super(client);
     }
 
     /**
@@ -29,7 +28,9 @@ public class Show extends Command {
     public void execute(String[] args) throws WrongAmountOfArgumentsException, IOException {
         if (args.length != 0) throw new WrongAmountOfArgumentsException(0, args.length);
 
-        ShowResponse response = (ShowResponse) client.sendAndReceive(new ShowRequest());
+        Response receivedResponse = client.sendAndReceive(new ShowRequest());
+        ShowResponse response = handleResponse(receivedResponse, ShowResponse.class);
+        if (response == null) return;
 
 
         if (response.getTickets() == null || response.getTickets().isEmpty()) {

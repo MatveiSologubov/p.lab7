@@ -8,6 +8,7 @@ import ru.itmo.common.exceptions.WrongAmountOfArgumentsException;
 import ru.itmo.common.models.User;
 import ru.itmo.common.network.requests.AuthRequest;
 import ru.itmo.common.network.responses.AuthResponse;
+import ru.itmo.common.network.responses.Response;
 
 import java.io.IOException;
 
@@ -31,7 +32,9 @@ public class Auth extends NetworkCommand {
 
         User user = new UserBuilder(ScannerManager.getScanner()).build();
 
-        AuthResponse response = (AuthResponse) client.sendAndReceive(new AuthRequest(user));
+        Response receivedResponse = client.sendAndReceive(new AuthRequest(user));
+        AuthResponse response = handleResponse(receivedResponse, AuthResponse.class);
+        if (response == null) return;
 
         if (response.isSuccess()) {
             System.out.println("Authentication successful!");

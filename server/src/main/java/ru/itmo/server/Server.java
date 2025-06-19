@@ -2,7 +2,11 @@ package ru.itmo.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.itmo.common.models.User;
+import ru.itmo.common.network.requests.AuthRequest;
+import ru.itmo.common.network.requests.RegisterRequest;
 import ru.itmo.common.network.requests.Request;
+import ru.itmo.common.network.responses.ErrorResponse;
 import ru.itmo.common.network.responses.NullResponse;
 import ru.itmo.common.network.responses.Response;
 import ru.itmo.common.util.Config;
@@ -10,6 +14,7 @@ import ru.itmo.common.util.Serializer;
 import ru.itmo.server.commands.*;
 import ru.itmo.server.db.DatabaseInitializer;
 import ru.itmo.server.db.TicketRepository;
+import ru.itmo.server.db.UserRepository;
 import ru.itmo.server.managers.CollectionManager;
 import ru.itmo.server.managers.CommandRegistry;
 import ru.itmo.server.managers.ConsoleManager;
@@ -18,6 +23,7 @@ import ru.itmo.server.managers.NetworkManager;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 
 /**
  * Server application entry point.
@@ -104,6 +110,12 @@ public final class Server {
             Request request = (Request) Serializer.deserialize(data);
             logger.info("Processing command '{}' from {}", request.name(), clientAddress);
 
+            if (!checkAuthorization(request)) {
+                logger.info("Client ({}) don't have authorization. Sending error response", clientAddress);
+                networkManager.sendResponse(new ErrorResponse("Authentication required to issue this command"), clientAddress);
+                return;
+            }
+
             Command command = commandRegistry.getCommand(request.name());
             Response response = new NullResponse();
             if (command != null) {
@@ -116,6 +128,17 @@ public final class Server {
         }
     }
 
+    private boolean checkAuthorization(Request request) {
+        if (request instanceof AuthRequest || request instanceof RegisterRequest) return true;
+        User user = request.getUser();
+        if (user == null) return false;
+        try {
+            return UserRepository.authenticate(user.getLogin(), user.getPassword());
+        } catch (SQLException e) {
+            logger.error("Failed to authorize user ({})", user, e);
+            return false;
+        }
+    }
 
     private void shutdown() {
         logger.info("Starting server shutdown");
