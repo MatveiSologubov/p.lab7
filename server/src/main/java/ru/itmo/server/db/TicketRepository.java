@@ -123,6 +123,26 @@ public class TicketRepository {
         }
     }
 
+    /**
+     * Delete Ticket with specified id
+     *
+     * @param id    ID of the ticket to delete
+     * @param login user issuing command
+     * @return true if deleted more than zero tickets
+     */
+    public static boolean deleteById(long id, String login) {
+        String sql = "DELETE FROM tickets WHERE id = ? AND owner_login = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ps.setString(2, login);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting ticket", e);
+        }
+    }
+
     private static PreparedStatement getPreparedStatement() throws SQLException {
         String sql = """
                 INSERT INTO tickets(name, coord_x, coord_y, creation_date,

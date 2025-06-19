@@ -1,10 +1,10 @@
 package ru.itmo.server.commands;
 
-import ru.itmo.common.models.Ticket;
 import ru.itmo.common.network.requests.RemoveByIdRequest;
 import ru.itmo.common.network.requests.Request;
 import ru.itmo.common.network.responses.RemoveByIdResponse;
 import ru.itmo.common.network.responses.Response;
+import ru.itmo.server.db.TicketRepository;
 import ru.itmo.server.managers.CollectionManager;
 
 /**
@@ -28,22 +28,15 @@ public class RemoveById extends Command {
             return new RemoveByIdResponse(false, "Collection is empty");
         }
         RemoveByIdRequest removeByIdRequest = (RemoveByIdRequest) request;
-        for (Ticket ticket : collectionManager.getCollection()) {
-            if (ticket.getId() == removeByIdRequest.getId()) {
-                collectionManager.getCollection().remove(ticket);
-                return new RemoveByIdResponse(true, null);
-            }
-        }
 
         long idToRemove = removeByIdRequest.getId();
-        boolean removed = collectionManager.getCollection()
-                .removeIf(t -> t.getId() == idToRemove);
-
-        if (removed) {
+        boolean success = TicketRepository.deleteById(idToRemove, request.getUser().getLogin());
+        if (success) {
+            collectionManager.getCollection().removeIf(t -> t.getId() == idToRemove);
             return new RemoveByIdResponse(true, null);
         }
 
-        String message = "Ticket with id " + idToRemove + " was not found";
+        String message = "Ticket with id " + idToRemove + " was not found. Or you are not the owner of this ticket";
         return new RemoveByIdResponse(false, message);
     }
 }
