@@ -30,6 +30,11 @@ public class Clear extends NetworkCommand {
         ClearResponse response = handleResponse(receivedResponse, ClearResponse.class);
         if (response == null) return;
 
+        if (!response.isSuccess()) {
+            System.out.println("Something went wrong");
+            return;
+        }
+
         System.out.println("Tickets removed from collection: " + response.getLinesRemoved());
     }
 

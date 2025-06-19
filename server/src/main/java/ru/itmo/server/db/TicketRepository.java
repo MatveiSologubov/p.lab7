@@ -1,5 +1,7 @@
 package ru.itmo.server.db;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.itmo.common.models.Coordinates;
 import ru.itmo.common.models.Person;
 import ru.itmo.common.models.Ticket;
@@ -14,6 +16,8 @@ import java.util.Set;
  * Class for managing tickets in database
  */
 public class TicketRepository {
+    private static final Logger logger = LogManager.getLogger(TicketRepository.class);
+
     /**
      * Pulls all the tickets from database
      *
@@ -51,7 +55,7 @@ public class TicketRepository {
                 result.add(ticket);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error reading from db", e);
+            logger.error("Error reading from database", e);
         }
 
         return result;
@@ -128,7 +132,7 @@ public class TicketRepository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error inserting ticket", e);
+            logger.error("Error inserting ticket", e);
         }
         return null;
     }
@@ -148,7 +152,8 @@ public class TicketRepository {
             return ps.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error clearing user tickets", e);
+            logger.error("Error clearing user tickets", e);
+            return -1;
         }
     }
 
@@ -168,7 +173,8 @@ public class TicketRepository {
             ps.setString(2, login);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting ticket", e);
+            logger.error("Error deleting tickets by id", e);
+            return false;
         }
     }
 
@@ -198,7 +204,8 @@ public class TicketRepository {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating ticket", e);
+            logger.error("Error updating ticket", e);
+            return false;
         }
     }
 }

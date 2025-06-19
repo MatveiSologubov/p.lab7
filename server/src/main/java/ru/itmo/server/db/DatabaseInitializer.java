@@ -1,5 +1,8 @@
 package ru.itmo.server.db;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -8,6 +11,8 @@ import java.sql.Statement;
  * Class for initializing database
  */
 public class DatabaseInitializer {
+    private static final Logger logger = LogManager.getLogger(DatabaseInitializer.class);
+
     private static final String[] DROP_DB_SQL = {
             """ 
             DROP TABLE IF EXISTS tickets, users CASCADE
@@ -60,9 +65,9 @@ public class DatabaseInitializer {
                 statement.execute(ddl);
             }
 
-            System.out.println("DB initialized");
+            logger.info("Database initialized");
         } catch (SQLException e) {
-            throw new RuntimeException("Error initializing db", e);
+            logger.error("Database initialization failed", e);
         }
     }
 
@@ -70,6 +75,7 @@ public class DatabaseInitializer {
      * Drops database and reinitialize new one
      */
     public static void reinitialize() {
+        logger.info("Starting database reinitialization");
         try (Connection connection = Database.getConnection();
              Statement statement = connection.createStatement()) {
 
@@ -77,11 +83,11 @@ public class DatabaseInitializer {
                 statement.execute(ddl);
             }
 
-            System.out.println("DB dropped");
+            logger.info("Database dropped");
 
             init();
         } catch (SQLException e) {
-            throw new RuntimeException("Error dropping database", e);
+            logger.error("Database dropping failed", e);
         }
     }
 }

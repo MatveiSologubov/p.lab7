@@ -26,6 +26,8 @@ public class Clear extends Command {
         int linesRemoved = TicketRepository.deleteAllByUser(login);
         collectionManager.deleteAllByUser(login);
 
-        return new ClearResponse(linesRemoved);
+        if (linesRemoved == -1) return new ClearResponse(false, 0);
+
+        return new ClearResponse(true, linesRemoved);
     }
 }
