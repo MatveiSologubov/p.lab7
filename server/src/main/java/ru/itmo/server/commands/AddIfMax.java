@@ -42,7 +42,7 @@ public class AddIfMax extends Command {
         }
 
         try (PreparedStatement statement = TicketRepository.prepareAddStatement(ticket, request.getUser().getLogin());
-             ResultSet resultSet = statement.executeQuery()){
+             ResultSet resultSet = statement.executeQuery()) {
 
             if (resultSet.next()) {
                 long generatedId = resultSet.getLong(1);
