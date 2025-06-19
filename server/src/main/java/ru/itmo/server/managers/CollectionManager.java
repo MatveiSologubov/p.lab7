@@ -67,6 +67,10 @@ public class CollectionManager {
         Ticket.setIdCounter(maxId + 1);
     }
 
+    public void deleteAllByUser(String login) {
+        collection.removeIf(ticket -> ticket.getOwner().equals(login));
+    }
+
     public LocalDateTime getInitTime() {
         return this.initTime;
     }

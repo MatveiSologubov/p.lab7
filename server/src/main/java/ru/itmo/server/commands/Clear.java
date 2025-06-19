@@ -24,7 +24,7 @@ public class Clear extends Command {
     public Response execute(Request request) {
         String login = request.getUser().getLogin();
         int linesRemoved = TicketRepository.deleteAllByUser(login);
-        collectionManager.setCollection(TicketRepository.getAllTickets());
+        collectionManager.deleteAllByUser(login);
 
         return new ClearResponse(linesRemoved);
     }
